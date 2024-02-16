@@ -55,13 +55,17 @@ Task A is running.
 1. Read the code and comments of [`ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub` in `scheduler.cpp`](../../lib/sched/scheduler.cpp#L482) and **implement the `TODO` in the function**.  
 
 ## What to submit on ELMS before your lab in the week of Mar 17:
-1. A pdf that has:
+
+1. The file `exceptionstub.S` in which you have implemented the `TODO`s under the label `do_context_switch_on_irq_return`.
+2. The file `scheduler.cpp` in which you have implemented the `TODO` in the function `ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub`.
+3. A pdf that has:
 	- Members of your group.
 	- A screenshot/photo that shows the four tasks concurrently running (main task, task A, task B, and task C).
-1. The file `exceptionstub.S` in which you have implemented the `TODO`s under the label `do_context_switch_on_irq_return`.
-1. The file `scheduler.cpp` in which you have implemented the `TODO` in the function `ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub`.
+	- Answer the following questions in 2-3 sentences:
+		* What are the differences between project 1 and project 2 in perspective of swtiching context?
+		* What is a IRQ mode?
 
-## Important documents for reference
+## Important documents for reference 
 - [1] [ARM Architecture Reference Manual](https://documentation-service.arm.com/static/5f8dacc8f86e16515cdb865a)
 - [2] [ARM1176JZF-S Technical Reference Manual](https://developer.arm.com/documentation/ddi0301/latest/)
 	- ARM1176JZF-S is the processor used in Raspberry Pi Zero according to [here](https://www.raspberrypi.com/documentation/computers/processors.html).
