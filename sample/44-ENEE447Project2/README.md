@@ -1,5 +1,5 @@
 
-# Project 2: Preemptive Multitasking (initiated by timer interrupt)
+# ENEE447 2024 Spring Project 2: Preemptive Multitasking (initiated by timer interrupt)
 
   
 
@@ -54,7 +54,7 @@ Task A is running.
 1. Read the code and comments of [`IRQStub` in `exceptionstub.S`](../../lib/exceptionstub.S#L80) and **implement the `TODO`s under the label `do_context_switch_on_irq_return`**.  
 1. Read the code and comments of [`ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub` in `scheduler.cpp`](../../lib/sched/scheduler.cpp#L482) and **implement the `TODO` in the function**.  
 
-## What to submit on ELMS before your lab in the week of Mar 13:
+## What to submit on ELMS before your lab in the week of Mar 17:
 1. A pdf that has:
 	- Members of your group.
 	- A screenshot/photo that shows the four tasks concurrently running (main task, task A, task B, and task C).
