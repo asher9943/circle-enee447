@@ -169,32 +169,38 @@ do_context_switch_on_irq_return:
 	// Save interrupted task's r15/pc in alloated space
 	stmia	sp, {lr} // Why are we saving lr instead of pc? 
 	                 // Read "A2.6.8 Interrupt request (IRQ) exception" in [1]. 
+					 // WHY IS THIS HERE? WE'RE PUTTING LR ON THE STACK TWICE!!
 
 	// Allocate space on stack for saving interrupted task's r0-r14
 	sub	sp, sp, #60
 	// TODO: Save interrupted task's r0-r14 in alloated space
+	stmia sp, {r0-r14}
 
 	// Allocate space on stack for saving interrupted task's d0-d15
 	sub	sp, sp, #128
 	// TODO: Save interrupted task's d0-d15 in alloated space
+	vstmia sp, {d0-d15}
 
 	// Allocate space on stack for saving interrupted task's fpexc and fpscr.
 	sub	sp, sp, #8
 	// TODO: Save interrupted task's fpexc and fpscr in alloated space
+	vmrs r0, fpexc
+	vmrs r1, fpscr
+	stmia sp, {r0-r1}
 
 	// Allocate space on stack for saving interrupted task's cpsr
 	sub	sp, sp, #4
 	// Save interrupted task's cpsr which is currently in spsr_irq 
-	// mrs r0, spsr // Uncomment this line after you have implemented all the TODOs in this file
-	// stmia sp, {r0} // Uncomment this line after you have implemented all the TODOs in this file
+	mrs r0, spsr // Uncomment this line after you have implemented all the TODOs in this file
+	stmia sp, {r0} // Uncomment this line after you have implemented all the TODOs in this file
 
 	
 	// Next, we call the function `ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub`
 	//   with one argument (passed in r0). The function requires that the argument passed in
 	//   should be a pointer of `struct TTaskRegisters` that points to the saved context. 
 	//   Hence, we will first copy sp to r0 because sp at this moment is pointing to the saved context.
-	// mov	r0, sp
-	// bl	ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub
+	mov	r0, sp
+	bl	ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub
 	// NOTE: If you haven't implemented and tested the TODOs in this file, 
 	//   the above two lines could irreversibly overwrite registers and thus destroy the context of the 
 	//   interrupted task. Therefore, you should uncomment the above two lines only after you have 
@@ -207,22 +213,27 @@ do_context_switch_on_irq_return:
 
 
 	// Restore next task's cpsr into spsr_irq (hint: look up MSR instruction)
-	// ldmia sp, {r0} // Uncomment this line after you have implemented all the TODOs in this file
-	// msr spsr_cxsf, r0 // Uncomment this line after you have implemented all the TODOs in this file
+	ldmia sp, {r0} // Uncomment this line after you have implemented all the TODOs in this file
+	msr spsr_cxsf, r0 // Uncomment this line after you have implemented all the TODOs in this file
 	// Deallocate space previosuly allocated for saving cpsr
 	add	sp, sp, #4
 
 	// TODO: Restore next task's fpexc and fpscr
+	ldmia sp, {r0-r1}
+	vmsr fpexc, r0
+	vmsr fpscr, r1
 	
 	// Deallocate space previosuly allocated for saving fpexc and fpscr
 	add	sp, sp, #8
 
 	// TODO: Restore next task's d0-d15
+	vldmia sp, {d0-d15}
 	
 	// Deallocate space previosuly allocated for saving d0-d15
 	add	sp, sp, #128
 
 	// TODO: Restore next task's r0-r14
+	ldmia sp, {r0-r14}
 			      	
 	// Deallocate space previosuly allocated for saving r0-r14
 	add	sp, sp, #60

@@ -480,6 +480,7 @@ void ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub(TTaskRegiste
 {
 	should_contextswith_on_irq_return = 0;
 	CScheduler *scheduler = CScheduler::Get();
+	CTask *pNext = scheduler->m_pTask[scheduler->m_nCurrent];
 
 	// TODO: You should borrow all codes form Yield but make the following changes:
 	//   1. Use the variable `scheduler` above to fix any compilation errors.
@@ -489,15 +490,6 @@ void ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub(TTaskRegiste
 	//     make the function do exactly what it is supposed to do.
 
 	CLogger::Get()->Write(FromScheduler, LogDebug, "Current task is task %s, will switch to task %s.\n", scheduler->m_pCurrent->GetName(), pNext->GetName());
-
-	while ((scheduler->m_nCurrent = scheduler->GetNextTask()) == MAX_TASKS) // no task is ready
-	{
-		assert(scheduler->m_nTasks > 0);
-	}
-
-	assert(scheduler->m_nCurrent < MAX_TASKS);
-
-	CTask *pNext = scheduler->m_pTask[scheduler->m_nCurrent];
 
 	assert(pNext != 0);
 
@@ -521,5 +513,5 @@ void ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub(TTaskRegiste
 
 	assert(pNewRegs != 0);
 
-	TaskSwitch(pOldRegs, pNewRegs);
+	*regs_saved_by_irq_stub = *pNewRegs;
 }
