@@ -174,7 +174,7 @@ do_context_switch_on_irq_return:
 	// Allocate space on stack for saving interrupted task's r0-r14
 	sub	sp, sp, #60
 	// TODO: Save interrupted task's r0-r14 in alloated space
-	stmia sp, {r0-r14}
+	stmia sp, {r0-r14}^
 
 	// Allocate space on stack for saving interrupted task's d0-d15
 	sub	sp, sp, #128
@@ -186,7 +186,7 @@ do_context_switch_on_irq_return:
 	// TODO: Save interrupted task's fpexc and fpscr in alloated space
 	vmrs r0, fpexc
 	vmrs r1, fpscr
-	stmia sp, {r0-r1}
+	stmia sp, {r0,r1}
 
 	// Allocate space on stack for saving interrupted task's cpsr
 	sub	sp, sp, #4
@@ -194,7 +194,6 @@ do_context_switch_on_irq_return:
 	mrs r0, spsr // Uncomment this line after you have implemented all the TODOs in this file
 	stmia sp, {r0} // Uncomment this line after you have implemented all the TODOs in this file
 
-	
 	// Next, we call the function `ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub`
 	//   with one argument (passed in r0). The function requires that the argument passed in
 	//   should be a pointer of `struct TTaskRegisters` that points to the saved context. 
@@ -211,7 +210,6 @@ do_context_switch_on_irq_return:
 	
 	// What we will do next is to restore the context of the next task.
 
-
 	// Restore next task's cpsr into spsr_irq (hint: look up MSR instruction)
 	ldmia sp, {r0} // Uncomment this line after you have implemented all the TODOs in this file
 	msr spsr_cxsf, r0 // Uncomment this line after you have implemented all the TODOs in this file
@@ -219,7 +217,7 @@ do_context_switch_on_irq_return:
 	add	sp, sp, #4
 
 	// TODO: Restore next task's fpexc and fpscr
-	ldmia sp, {r0-r1}
+	ldmia sp, {r0,r1}
 	vmsr fpexc, r0
 	vmsr fpscr, r1
 	
@@ -233,11 +231,12 @@ do_context_switch_on_irq_return:
 	add	sp, sp, #128
 
 	// TODO: Restore next task's r0-r14
-	ldmia sp, {r0-r14}
+	ldmia sp, {r0-r14}^
 			      	
 	// Deallocate space previosuly allocated for saving r0-r14
 	add	sp, sp, #60
 
+	// bl GotHere
 
 	// Restore next task's pc and at the same time deallocte the space 
 	//   previosuly allocated for saving it
