@@ -127,6 +127,29 @@ __contextswitch_impl:
 	// TODO: Copy your working project 2 solution to here
 	// (TAs will publish project 2 solution later after 
 	// all lab sections have concluded project 2)
+	sub sp, sp, #60
+	stmia sp, {r0-r14}^
+	sub sp, sp, #128
+	vstmia sp, {d0-d15}
+	sub sp, sp, #8
+	vmrs r2, fpexc
+	vmrs r3, fpscr
+	stmia sp, {r2, r3}
+	sub sp, sp, #4
+	mrs r0, spsr
+	stmia sp, {r0}
+	mov r0, sp
+	bl ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub
+	ldmia sp, {r0}
+	msr spsr_cxsf, r0
+	add sp, sp, #4
+	ldmia sp, {r2, r3}
+	vmsr fpexc, r2
+	vmsr fpscr, r3
+	add sp, sp, #8
+	add sp, sp, #128
+	ldmia sp, {r0-r14}^
+	add sp, sp, #60
 
 	ldmia	sp!, {pc}^
 
