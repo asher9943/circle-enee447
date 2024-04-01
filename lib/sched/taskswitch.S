@@ -24,9 +24,6 @@
 
 	.globl	TaskSwitch
 TaskSwitch:
-	// TODO: delete the instruction below: 
-	bx	lr
-
 	// TODO: Implement `TaskSwitch`
 	// Hint: 
 	// We actually don't need to write a lot of codes here because 
@@ -41,6 +38,8 @@ TaskSwitch:
 	// 	  be satisfied before we jump to `__contextswitch_impl`.
 	//	- Write codes here so that the assumptions are satisfied.
 	//	- Jump to __contextswitch_impl.
+
+	jmp __contextswitch_impl
 
 #else
 
