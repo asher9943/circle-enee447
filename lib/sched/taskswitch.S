@@ -39,8 +39,7 @@ TaskSwitch:
 	//	- Write codes here so that the assumptions are satisfied.
 	//	- Jump to __contextswitch_impl.
 
-	jmp __contextswitch_impl
-
+	b __contextswitch_impl
 #else
 
 	.globl	TaskSwitch
