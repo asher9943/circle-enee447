@@ -538,7 +538,7 @@ void ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub(TTaskRegiste
 		return;
 	}
 
-	CLogger::Get()->Write(FromScheduler, LogDebug, "Current task is task %s, will switch to task %s.\n", scheduler->m_pCurrent->GetName(), pNext->GetName());
+	// CLogger::Get()->Write(FromScheduler, LogDebug, "Current task is task %s, will switch to task %s.\n", scheduler->m_pCurrent->GetName(), pNext->GetName());
 
 	TTaskRegisters *pOldRegs = scheduler->m_pCurrent->GetRegs();
 	scheduler->m_pCurrent = pNext;
