@@ -39,10 +39,6 @@ TaskSwitch:
 	//	- Write codes here so that the assumptions are satisfied.
 	//	- Jump to __contextswitch_impl.
 
-	// need r0-r1, save'em
-	// sub sp, sp, #8
-	// stmia sp, {r0-r1}^
-
 	// assumption 1: next function label loaded in LR
 	// the LR coming in here is correct, just need to save it somewhere and load to LR of IRQ mode
 	mov r0, lr
@@ -62,10 +58,6 @@ TaskSwitch:
 	// b/c we are now in IRQ mode it implicitly is writing to spsr_irq
 	msr spsr, r1
  
- 	// need r0-r1, save'em
-	// ldmia sp, {r0-r1}^
-	// add sp, sp, #8
-
 	b __contextswitch_impl
 #else
 

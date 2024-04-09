@@ -329,6 +329,7 @@ void CScheduler::WakeTasks(CTask **ppWaitListHead)
 
 unsigned CScheduler::GetNextTask(void)
 {
+	EnterCritical(1);
 	// Added by TA: Making sure no active task is mistakenly considered removed.
 	for (unsigned i = m_nTasks; i < MAX_TASKS; i++)
 	{
@@ -470,7 +471,7 @@ unsigned CScheduler::GetNextTask(void)
 			break;
 		}
 	}
-
+	LeaveCritical();
 	return MAX_TASKS;
 }
 
