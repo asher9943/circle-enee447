@@ -3,7 +3,7 @@
 //
 // Circle - A C++ bare metal environment for Raspberry Pi
 // Copyright (C) 2015-2021  R. Stange <rsta2@o2online.de>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -27,17 +27,17 @@
 #include <circle/user_task_exe.h>
 
 #if AARCH == 32
-	#include <circle/armv6mmu.h>
+#include <circle/armv6mmu.h>
 #else
-	#error "64-bit ARM not supported!"
+#error "64-bit ARM not supported!"
 #endif
 
-CTask::CTask (unsigned nStackSize, boolean bCreateSuspended)
-:	m_State (bCreateSuspended ? TaskStateNew : TaskStateReady),
-	m_bSuspended (FALSE),
-	m_nStackSize (nStackSize),
-	m_pStack (0),
-	m_pWaitListNext (0)
+CTask::CTask(unsigned nStackSize, boolean bCreateSuspended)
+	: m_State(bCreateSuspended ? TaskStateNew : TaskStateReady),
+	  m_bSuspended(FALSE),
+	  m_nStackSize(nStackSize),
+	  m_pStack(0),
+	  m_pWaitListNext(0)
 {
 	for (unsigned i = 0; i < TASK_USER_DATA_SLOTS; i++)
 	{
@@ -46,35 +46,35 @@ CTask::CTask (unsigned nStackSize, boolean bCreateSuspended)
 
 	if (m_nStackSize != 0)
 	{
-		assert (m_nStackSize >= 1024);
+		assert(m_nStackSize >= 1024);
 #if AARCH == 32
-		assert ((m_nStackSize & 3) == 0);
+		assert((m_nStackSize & 3) == 0);
 #else
-		assert ((m_nStackSize & 15) == 0);
+		assert((m_nStackSize & 15) == 0);
 #endif
 		m_pStack = new u8[m_nStackSize];
-		
-		assert (m_pStack != 0);
 
-		InitializeRegs ();
+		assert(m_pStack != 0);
+
+		InitializeRegs();
 	}
 
-	m_Name.Format ("@%lp", this);
+	m_Name.Format("@%lp", this);
 
-	CScheduler::Get ()->AddTask (this);
+	CScheduler::Get()->AddTask(this);
 }
 
-CTask::~CTask (void)
+CTask::~CTask(void)
 {
-	assert (m_State == TaskStateTerminated);
+	assert(m_State == TaskStateTerminated);
 
 	m_State = TaskStateUnknown;
 
-	delete [] m_pStack;
+	delete[] m_pStack;
 	m_pStack = 0;
 }
 
-void CTask::Start (void)
+void CTask::Start(void)
 {
 	if (m_State == TaskStateNew)
 	{
@@ -82,138 +82,136 @@ void CTask::Start (void)
 	}
 	else
 	{
-		assert (m_bSuspended);
+		assert(m_bSuspended);
 		m_bSuspended = FALSE;
 	}
 }
 
-void CTask::Suspend (void)
+void CTask::Suspend(void)
 {
-	assert (m_State != TaskStateNew);
-	assert (!m_bSuspended);
+	assert(m_State != TaskStateNew);
+	assert(!m_bSuspended);
 	m_bSuspended = TRUE;
 }
 
-void CTask::Run (void)		// dummy method which is never called
+void CTask::Run(void) // dummy method which is never called
 {
-	assert (0);
+	assert(0);
 }
 
-void CTask::Terminate (void)
+void CTask::Terminate(void)
 {
 	m_State = TaskStateTerminated;
 
-	m_Event.Set ();
-	CScheduler::Get ()->Yield ();
+	m_Event.Set();
+	CScheduler::Get()->Yield();
 
-	assert (0);
+	assert(0);
 }
 
-void CTask::WaitForTermination (void)
+void CTask::WaitForTermination(void)
 {
 	// Before accessing any of our member variables
-	// make sure this task object hasn't been deleted by 
+	// make sure this task object hasn't been deleted by
 	// checking it's still registered with the scheduler
-	if (!CScheduler::Get()->IsValidTask (this))
+	if (!CScheduler::Get()->IsValidTask(this))
 	{
 		return;
 	}
 
-	m_Event.Wait ();
+	m_Event.Wait();
 }
 
-void CTask::SetName (const char *pName)
+void CTask::SetName(const char *pName)
 {
 	m_Name = pName;
 }
 
-const char *CTask::GetName (void) const
+const char *CTask::GetName(void) const
 {
 	return m_Name;
 }
 
-void CTask::SetUserData (void *pData, unsigned nSlot)
+void CTask::SetUserData(void *pData, unsigned nSlot)
 {
 	m_pUserData[nSlot] = pData;
 }
 
-void *CTask::GetUserData (unsigned nSlot)
+void *CTask::GetUserData(unsigned nSlot)
 {
 	return m_pUserData[nSlot];
 }
 
 #if AARCH == 32
 
-void CTask::InitializeRegs (void)
+void CTask::InitializeRegs(void)
 {
-	memset (&m_Regs, 0, sizeof m_Regs);
+	memset(&m_Regs, 0, sizeof m_Regs);
 
-	m_Regs.r0 = (u32) this;		// pParam for TaskEntry()
+	m_Regs.r0 = (u32)this; // pParam for TaskEntry()
 
-	assert (m_pStack != 0);
-	m_Regs.sp = (u32) m_pStack + m_nStackSize;
+	assert(m_pStack != 0);
+	m_Regs.sp = (u32)m_pStack + m_nStackSize;
 
-#define VFP_FPEXC_EN   (1 << 30)
+#define VFP_FPEXC_EN (1 << 30)
 	m_Regs.fpexc = VFP_FPEXC_EN;
-#define VFP_FPSCR_DN   (1 << 25)       // enable Default NaN mode
+#define VFP_FPSCR_DN (1 << 25) // enable Default NaN mode
 	m_Regs.fpscr = VFP_FPSCR_DN;
 
-	m_Regs.pc = (u32) &TaskEntry;
+	m_Regs.pc = (u32)&TaskEntry;
 
 	m_Regs.cpsr = (u32)0x1F; // Kernel mode with IRQ interrupt enabled
 
 	m_Regs.contextid = (u32)this; // Use the addr of this CTask instance as context id.
-	m_Regs.ttbr0 = readTTBR0(); // Use kernel page table for this task.
+	m_Regs.ttbr0 = readTTBR0();	  // Use kernel page table for this task.
 }
 
 #else
 
-void CTask::InitializeRegs (void)
+void CTask::InitializeRegs(void)
 {
-	memset (&m_Regs, 0, sizeof m_Regs);
+	memset(&m_Regs, 0, sizeof m_Regs);
 
-	m_Regs.x0 = (u64) this;		// pParam for TaskEntry()
+	m_Regs.x0 = (u64)this; // pParam for TaskEntry()
 
-	assert (m_pStack != 0);
-	m_Regs.sp = (u64) m_pStack + m_nStackSize;
+	assert(m_pStack != 0);
+	m_Regs.sp = (u64)m_pStack + m_nStackSize;
 
-	m_Regs.x30 = (u64) &TaskEntry;
+	m_Regs.x30 = (u64)&TaskEntry;
 
 	u64 nFPCR;
-	asm volatile ("mrs %0, fpcr" : "=r" (nFPCR));
+	asm volatile("mrs %0, fpcr" : "=r"(nFPCR));
 	m_Regs.fpcr = nFPCR;
 }
 
 #endif
 
-void CTask::TaskEntry (void *pParam)
+void CTask::TaskEntry(void *pParam)
 {
-	CTask *pThis = (CTask *) pParam;
-	assert (pThis != 0);
+	CTask *pThis = (CTask *)pParam;
+	assert(pThis != 0);
 
-	pThis->Run ();
+	pThis->Run();
 
 	DisableIRQs();
 	pThis->m_State = TaskStateTerminated;
-	pThis->m_Event.Set ();
-	CScheduler::Get ()->Yield ();
-	assert (0);
+	pThis->m_Event.Set();
+	CScheduler::Get()->Yield();
+	assert(0);
 }
 
-
 CUserModeTask::CUserModeTask(const char *exe_path)
-: CTask(TASK_STACK_SIZE, TRUE)
+	: CTask(TASK_STACK_SIZE, TRUE)
 {
-	// Create a page table for this user mode task. 
+	// Create a page table for this user mode task.
 	// The new page table is initialized as a copy of the page table used by kernel tasks.
-	m_pPageTable = new CPageTable (
-		(u32*)((int)m_mem_to_contain_pTable & ~(0x4000-1)) + 0x4000, // A hack that makes sure the page table is aligned to 16KB boundaries.
-		CMemorySystem::Get()->GetKernelPageTable()
-	);
-	assert (m_pPageTable != 0);
+	m_pPageTable = new CPageTable(
+		(u32 *)((int)m_mem_to_contain_pTable & ~(0x4000 - 1)) + 0x4000, // A hack that makes sure the page table is aligned to 16KB boundaries.
+		CMemorySystem::Get()->GetKernelPageTable());
+	assert(m_pPageTable != 0);
 
-	const u32 *m_exe_load_addr = (u32*)0x80000000;
-	const u32 *m_user_stack_init_addr = (u32*)0x9FFFFFF0;
+	const u32 *m_exe_load_addr = (u32 *)0x80000000;
+	const u32 *m_user_stack_init_addr = (u32 *)0x9FFFFFF0;
 
 	kernel_sp = m_Regs.sp;
 
@@ -229,16 +227,21 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 	//   - For sp, assign `m_user_stack_init_addr` to it.
 	//   - For cpsr, you need to make sure it's user mode and IRQ interrupt is enabled.
 
-	void *physical_page_1_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();	
-	void *physical_page_2_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();	
+	m_Regs.ttbr0 = m_pPageTable->GetBaseAddress() << 14; // need that address in bits 31:14, so shift
+	m_Regs.pc = *m_exe_load_addr;
+	m_Regs.sp = *m_user_stack_init_addr;
+	m_Regs.cpsr = (m_Regs.cpsr | 0x10) & 0xFFFFFF70; // user mode is 10000 in LSB, IRQ interrupt is 0XXX XXXX
+
+	void *physical_page_1_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();
+	void *physical_page_2_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();
 	assert(physical_page_1_baseaddr != 0);
 	assert(physical_page_2_baseaddr != 0);
 
-	// NOTE: Normally, if we have a functioning file system, the following line 
-	//       would be a file read operation which reads the binary file at 
-	//	 `exe_path` from disk into memory. 
+	// NOTE: Normally, if we have a functioning file system, the following line
+	//       would be a file read operation which reads the binary file at
+	//	 `exe_path` from disk into memory.
 	//
-	//	 Since we don't have a functioning file system, we will 
+	//	 Since we don't have a functioning file system, we will
 	//	 use the following hack to pretend we had read the file somehow
 	//	 into the char array `user_mode_task_exe`.
 	//
@@ -248,8 +251,8 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 
 	u32 *pageTable = m_pPageTable->GetPageTable();
 
-	int page_no_1 = 0xFFF; // TODO: figure out what this variable should be.
-	int page_no_2 = 0xFFF; // TODO: figure out what this variable should be.
+	int page_no_1 = 0xC0E; // TODO: figure out what this variable should be.
+	int page_no_2 = 0xC1E; // TODO: figure out what this variable should be.
 
 	pageTable[page_no_1] = (int)physical_page_1_baseaddr | 0xC0E;
 	pageTable[page_no_2] = (int)physical_page_2_baseaddr | 0xC1E;
@@ -257,7 +260,8 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 	Start();
 }
 
-CUserModeTask::~CUserModeTask(void) {
+CUserModeTask::~CUserModeTask(void)
+{
 	u32 *pageTable = m_pPageTable->GetPageTable();
 
 	// TODO: Deallocate the physical pages of this task.
@@ -268,21 +272,21 @@ CUserModeTask::~CUserModeTask(void) {
 	//         CMemorySystem::Get()->UserModeTaskPageFree(physical_page_2_baseaddr);
 }
 
-void CUserModeTask::Run(void) {
+void CUserModeTask::Run(void)
+{
 	// This  function should never run in a user mode task.
 	assert(0);
 }
 
-
-int save_user_sp_and_get_kernel_sp(u32 user_sp) {
-	CUserModeTask* pUserModeTask = (CUserModeTask*)(CScheduler::Get()->GetCurrentTask());
+int save_user_sp_and_get_kernel_sp(u32 user_sp)
+{
+	CUserModeTask *pUserModeTask = (CUserModeTask *)(CScheduler::Get()->GetCurrentTask());
 	pUserModeTask->user_sp = user_sp;
 	return pUserModeTask->kernel_sp;
 }
 
-extern "C" int get_saved_user_sp() {
-	CUserModeTask* pUserModeTask = (CUserModeTask*)(CScheduler::Get()->GetCurrentTask());
+extern "C" int get_saved_user_sp()
+{
+	CUserModeTask *pUserModeTask = (CUserModeTask *)(CScheduler::Get()->GetCurrentTask());
 	return pUserModeTask->user_sp;
 }
-
-
