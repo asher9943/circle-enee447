@@ -266,10 +266,10 @@ CUserModeTask::~CUserModeTask(void)
 
 	// TODO: Deallocate the physical pages of this task.
 	// Hint: You can do something like:
-	//         void *physical_page_1_baseaddr = ...
-	//         void *physical_page_2_baseaddr = ...
-	//         CMemorySystem::Get()->UserModeTaskPageFree(physical_page_1_baseaddr);
-	//         CMemorySystem::Get()->UserModeTaskPageFree(physical_page_2_baseaddr);
+	void *physical_page_1_baseaddr = (void *) (pageTable[0xC0E] | 0xC0E);
+	void *physical_page_2_baseaddr = (void *) (pageTable[0xC1E] | 0xC1E);
+	CMemorySystem::Get()->UserModeTaskPageFree(physical_page_1_baseaddr);
+	CMemorySystem::Get()->UserModeTaskPageFree(physical_page_2_baseaddr);
 }
 
 void CUserModeTask::Run(void)
