@@ -227,7 +227,7 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 	//   - For sp, assign `m_user_stack_init_addr` to it.
 	//   - For cpsr, you need to make sure it's user mode and IRQ interrupt is enabled.
 
-	m_Regs.ttbr0 = m_pPageTable->GetBaseAddress() << 14; // need that address in bits 31:14, so shift
+	writeTTBR0(m_pPageTable->GetBaseAddress() << 14); // need that address in bits 31:14, so shift
 	m_Regs.pc = *m_exe_load_addr;
 	m_Regs.sp = *m_user_stack_init_addr;
 	m_Regs.cpsr = (m_Regs.cpsr | 0x10) & 0xFFFFFF70; // user mode is 10000 in LSB, IRQ interrupt is 0XXX XXXX
