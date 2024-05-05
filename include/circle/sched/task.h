@@ -147,6 +147,9 @@ public:
 	~CUserModeTask(void);
 
 	void Run(void);
+	void SetUserSP(u32 sp);
+	u32 GetUserSP(void);
+	u32 GetKernelSP(void);
 
 private:
 #if AARCH == 32

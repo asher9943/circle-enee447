@@ -278,15 +278,26 @@ void CUserModeTask::Run(void)
 	assert(0);
 }
 
+void CUserModeTask::SetUserSP(u32 sp) {
+	user_sp = sp;
+}
+
+u32 CUserModeTask::GetUserSP(void) {
+	return user_sp;
+}
+
+u32 CUserModeTask::GetKernelSP(void) {
+	return kernel_sp;
+}
+
 int save_user_sp_and_get_kernel_sp(u32 user_sp)
 {
 	CUserModeTask *pUserModeTask = (CUserModeTask *)(CScheduler::Get()->GetCurrentTask());
-	pUserModeTask->user_sp = user_sp;
-	return pUserModeTask->kernel_sp;
+	pUserModeTask->SetUserSP(user_sp);
+	return pUserModeTask->GetKernelSP();
 }
 
-extern "C" int get_saved_user_sp()
-{
+int get_saved_user_sp(void) {
 	CUserModeTask *pUserModeTask = (CUserModeTask *)(CScheduler::Get()->GetCurrentTask());
-	return pUserModeTask->user_sp;
+	return pUserModeTask->GetUserSP();
 }

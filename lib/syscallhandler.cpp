@@ -4,6 +4,7 @@
 #include <string.h>
 
 int system_time = 0;
+const char *emptySource = "";
 
 int SyscallHandler(int arg1, int arg2, int arg3, int arg4) {
 	register long syscall_no asm ("r7");
@@ -20,7 +21,7 @@ int SyscallHandler(int arg1, int arg2, int arg3, int arg4) {
 			memcpy((void *) arg1, CScheduler::Get()->GetCurrentTask()->GetName(), arg2);
 		}
 		case 2: {	// print system call (note arg1 contains the pointer to the character string to print)
-			CLogger::Get()->Write("", LogNotice, (const char *) arg1);	
+			CLogger::Get()->Write(emptySource, LogNotice, (const char *) arg1);	
 		}
 		case 3: {	// sleep system call (note arg1 contains the integer representing the seconds to sleep)
 			CScheduler::Get()->Sleep(arg1);
