@@ -251,8 +251,8 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 
 	u32 *pageTable = m_pPageTable->GetPageTable();
 
-	int page_no_1 = 0xC0E; // TODO: figure out what this variable should be.
-	int page_no_2 = 0xC1E; // TODO: figure out what this variable should be.
+	int page_no_1 = 0xC0E;
+	int page_no_2 = 0xC1E;
 
 	pageTable[page_no_1] = (int)physical_page_1_baseaddr | 0xC0E;
 	pageTable[page_no_2] = (int)physical_page_2_baseaddr | 0xC1E;
