@@ -8,7 +8,8 @@ const char *emptySource = "";
 
 int SyscallHandler(int arg1, int arg2, int arg3, int arg4) {
 	register long syscall_no asm ("r7");
-	LOGMODULE("SyscallHandler");
+	//LOGMODULE("SyscallHandler");
+	//LOGDBG("syscall_no=%x", syscall_no);
 	int val_to_ret = 0;
 
 	switch(syscall_no) {
@@ -33,7 +34,7 @@ int SyscallHandler(int arg1, int arg2, int arg3, int arg4) {
 			break;
 		}
 		default: {
-			LOGERR("System call number not recognized");
+			//LOGERR("System call number not recognized");
 			val_to_ret = -1;
 			break;
 		}
