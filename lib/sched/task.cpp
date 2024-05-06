@@ -227,10 +227,10 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 	//   - For sp, assign `m_user_stack_init_addr` to it.
 	//   - For cpsr, you need to make sure it's user mode and IRQ interrupt is enabled.
 
-	writeTTBR0(m_pPageTable->GetBaseAddress() << 14); // need that address in bits 31:14, so shift
-	m_Regs.pc = *m_exe_load_addr;
-	m_Regs.sp = *m_user_stack_init_addr;
-	m_Regs.cpsr = (m_Regs.cpsr | 0x10) & 0xFFFFFF70; // user mode is 10000 in LSB, IRQ interrupt is 0XXX XXXX
+	m_Regs.ttbr0 = m_pPageTable->GetBaseAddress();
+	m_Regs.pc = (u32) m_exe_load_addr;
+	m_Regs.sp = (u32) m_user_stack_init_addr;
+	m_Regs.cpsr = 0x10; // user mode is 10000 in LSB, IRQ interrupt is 0XXX XXXX
 
 	void *physical_page_1_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();
 	void *physical_page_2_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();
@@ -251,8 +251,8 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 
 	u32 *pageTable = m_pPageTable->GetPageTable();
 
-	int page_no_1 = 0xC0E;
-	int page_no_2 = 0xC1E;
+	int page_no_1 = ((u32) m_exe_load_addr) >> 20;
+	int page_no_2 = ((u32) m_user_stack_init_addr) >> 20;
 
 	pageTable[page_no_1] = (int)physical_page_1_baseaddr | 0xC0E;
 	pageTable[page_no_2] = (int)physical_page_2_baseaddr | 0xC1E;
@@ -266,8 +266,8 @@ CUserModeTask::~CUserModeTask(void)
 
 	// TODO: Deallocate the physical pages of this task.
 	// Hint: You can do something like:
-	void *physical_page_1_baseaddr = (void *) (pageTable[0xC0E] | 0xC0E);
-	void *physical_page_2_baseaddr = (void *) (pageTable[0xC1E] | 0xC1E);
+	void *physical_page_1_baseaddr = (void *) (pageTable[(u32) 0x80000000 >> 20] & 0xFFF00000);
+	void *physical_page_2_baseaddr = (void *) (pageTable[(u32) 0x9FFFFFF0 >> 20] & 0xFFF00000);
 	CMemorySystem::Get()->UserModeTaskPageFree(physical_page_1_baseaddr);
 	CMemorySystem::Get()->UserModeTaskPageFree(physical_page_2_baseaddr);
 }
